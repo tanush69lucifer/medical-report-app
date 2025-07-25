@@ -7,12 +7,12 @@ def extract_values(text):
     ]
     results = {}
 
-    base_path = os.path.join(os.path.dirname(__file__), "knowledge")  # ✅ robust path
+    base_path = os.path.join(os.path.dirname(__file__), "knowledge")
 
     for file in files:
         path = os.path.join(base_path, f"{file}.json")
         if not os.path.exists(path):
-            continue  # skip missing files silently
+            continue  # skip missing files
         with open(path) as f:
             ranges = json.load(f)
 
