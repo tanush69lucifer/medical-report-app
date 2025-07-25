@@ -1,5 +1,9 @@
 import json
-with open("modules/medicine_db.json") as f:
+import os
+
+# Dynamically locate the JSON file path relative to this script
+json_path = os.path.join(os.path.dirname(__file__), "medicine_db.json")
+with open(json_path) as f:
     med_data = json.load(f)
 
 def interpret_results(report_list, age=0, gender="N/A", conditions="None"):
