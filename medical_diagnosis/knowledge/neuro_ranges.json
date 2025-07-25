@@ -1,0 +1,7 @@
+{
+  "Sodium": { "min": 135, "max": 145 },
+  "Potassium": { "min": 3.5, "max": 5.0 },
+  "Calcium": { "min": 8.5, "max": 10.5 },
+  "Vitamin B12": { "min": 200, "max": 900 },
+  "Magnesium": { "min": 1.7, "max": 2.2 }
+}

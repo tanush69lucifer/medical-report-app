@@ -1,0 +1,5 @@
+streamlit
+fpdf
+qrcode
+Pillow
+easyocr

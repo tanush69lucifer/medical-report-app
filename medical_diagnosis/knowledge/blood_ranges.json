@@ -1,0 +1,7 @@
+{
+  "Hemoglobin": { "min": 13.0, "max": 17.0 },
+  "WBC": { "min": 4000, "max": 11000 },
+  "Platelets": { "min": 150000, "max": 450000 },
+  "ESR": { "min": 0, "max": 20 },
+  "RBC": { "min": 4.5, "max": 5.9 }
+}

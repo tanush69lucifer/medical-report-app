@@ -1,0 +1,5 @@
+{
+  "Fasting Blood Sugar": { "min": 70, "max": 99 },
+  "HbA1c": { "min": 4.0, "max": 5.6 }
+}
+

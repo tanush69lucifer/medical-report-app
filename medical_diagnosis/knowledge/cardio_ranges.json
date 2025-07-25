@@ -1,0 +1,8 @@
+{
+  "Cholesterol": { "min": 125, "max": 200 },
+  "HDL": { "min": 40, "max": 60 },
+  "LDL": { "min": 0, "max": 100 },
+  "Triglycerides": { "min": 0, "max": 150 },
+  "BP Systolic": { "min": 90, "max": 120 },
+  "BP Diastolic": { "min": 60, "max": 80 }
+}

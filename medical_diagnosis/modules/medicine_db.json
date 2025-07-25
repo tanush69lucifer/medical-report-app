@@ -1,0 +1,17 @@
+{
+  "Liver enzyme imbalance": [
+    { "name": "Liv 52", "dose": "2 tablets", "duration": "10 days" }
+  ],
+  "Possible jaundice or liver dysfunction": [
+    { "name": "Silymarin", "dose": "140mg", "duration": "14 days" }
+  ],
+  "Bone or bile duct issues": [
+    { "name": "Calcimax", "dose": "1 tablet", "duration": "30 days" }
+  ],
+  "High Creatinine": [
+    { "name": "Ketosteril", "dose": "2 tablets", "duration": "15 days" }
+  ],
+  "High WBC": [
+    { "name": "Azithromycin", "dose": "500mg", "duration": "3 days" }
+  ]
+}
