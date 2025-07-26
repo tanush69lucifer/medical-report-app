@@ -88,7 +88,7 @@ if uploaded_files:
             mime="application/pdf"
         )
 
-        # ✅ One-time file.io link
+        # ✅ One-time link
         if fileio_url:
             st.markdown(f"🔗 [Click for One-Time Link]({fileio_url})", unsafe_allow_html=True)
         else:
