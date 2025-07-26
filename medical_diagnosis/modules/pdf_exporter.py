@@ -39,7 +39,7 @@ def export_to_pdf(name, age, gender, reports, summary):
     pdf.cell(0, 10, "Medical Diagnosis Report", ln=True, align="C", border=1)
     pdf.cell(0, 10, clean(f"Name: {name} | Age: {age} | Gender: {gender}"), ln=True, border=1)
 
-    # Report Section
+    # Reports
     for idx, report in enumerate(reports):
         pdf.ln(5)
         safe_add_line(f"--- Report {idx+1} ---", fill=True)
@@ -55,7 +55,7 @@ def export_to_pdf(name, age, gender, reports, summary):
             pdf.cell(60, 10, clean(val['status']), border=1)
             pdf.ln()
 
-    # Summary Section
+    # Summary
     pdf.ln(5)
     pdf.set_font("Helvetica", style="B", size=12)
     safe_add_line("--- Diagnosis Summary ---")
@@ -63,24 +63,28 @@ def export_to_pdf(name, age, gender, reports, summary):
     for line in summary.split('\n'):
         safe_add_multicell(line)
 
+    # Save locally
     os.makedirs("export", exist_ok=True)
-
-    # Save locally first
     local_path = f"export/report_{uuid.uuid4().hex[:8]}.pdf"
     pdf.output(local_path)
 
-    # Upload to File.io
-    with open(local_path, "rb") as f:
-        response = requests.post("https://file.io", files={"file": f})
-        fileio_url = response.json().get("link")
+    # Upload to File.io (One-time download)
+    try:
+        with open(local_path, "rb") as f:
+            response = requests.post("https://file.io", files={"file": f})
+        response_json = response.json()
+        fileio_url = response_json.get("link")
+    except Exception as e:
+        print("Error uploading to file.io:", e)
+        fileio_url = None
 
-    # Generate QR from file.io URL
+    # QR Code
     qr_path = "export/qr.png"
     if fileio_url:
         qr_img = qrcode.make(fileio_url)
         qr_img.save(qr_path)
 
-        # Add to PDF
+        # Add QR to PDF
         if pdf.get_y() > 230:
             pdf.add_page()
             pdf.rect(10, 10, 190, 277)
@@ -90,7 +94,7 @@ def export_to_pdf(name, age, gender, reports, summary):
         pdf.cell(0, 10, "Scan to Download", ln=True)
         pdf.image(qr_path, x=pdf.w - 60, y=pdf.get_y(), w=40)
 
-    # Return buffer for download
+    # In-memory buffer for Streamlit
     pdf_buffer = io.BytesIO()
     pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
