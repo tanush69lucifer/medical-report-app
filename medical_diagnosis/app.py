@@ -76,26 +76,20 @@ if uploaded_files:
 
         speak_text(summary.split("=== Recommendations ===")[0])
 
-        # ✅ Generate PDF, upload, QR
-        pdf_buffer, fileio_url, qr_path = export_to_pdf(name, age, gender, all_reports, summary)
+        # ✅ Generate PDF with QR
+        pdf_buffer, app_url, qr_path = export_to_pdf(name, age, gender, all_reports, summary)
 
         # ✅ Download (in-memory)
         st.markdown("### 📥 Download Report")
         st.download_button(
-            label="📄 Download PDF Report (Direct)",
+            label="📄 Download PDF Report",
             data=pdf_buffer,
             file_name="report.pdf",
             mime="application/pdf"
         )
 
-        # ✅ One-time link
-        if fileio_url:
-            st.markdown(f"🔗 [Click for One-Time Link]({fileio_url})", unsafe_allow_html=True)
-        else:
-            st.error("❌ Failed to generate one-time link.")
-
-        # ✅ Show QR
+        # ✅ Show QR image (static app QR)
         if os.path.exists(qr_path):
-            st.image(qr_path, caption="📲 Scan to Download (One-Time Link)")
+            st.image(qr_path, caption="📲 Scan to Open Diagnostics Assistant")
         else:
             st.info("QR not found.")
