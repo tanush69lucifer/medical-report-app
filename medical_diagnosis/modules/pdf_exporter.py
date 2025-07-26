@@ -1,8 +1,7 @@
 from fpdf import FPDF
 import qrcode
-import tempfile
+import io
 import re
-import os
 
 def export_to_pdf(name, age, gender, reports, summary):
     pdf = FPDF()
@@ -53,7 +52,7 @@ def export_to_pdf(name, age, gender, reports, summary):
                 pdf.rect(10, 10, 190, 277)
                 pdf.set_font("Helvetica", size=11)
             pdf.cell(60, 10, clean(param), border=1)
-            pdf.cell(60, 10, clean(val['value']), border=1)
+            pdf.cell(60, 10, clean(str(val['value'])), border=1)
             pdf.cell(60, 10, clean(val['status']), border=1)
             pdf.ln()
 
@@ -65,12 +64,15 @@ def export_to_pdf(name, age, gender, reports, summary):
     for line in summary.split('\n'):
         safe_add_multicell(line)
 
-    # Temporary QR image
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_qr:
-        qr_img = qrcode.make("http://yourdomain.com/export/report.pdf")
-        qr_img.save(temp_qr.name)
-        qr_path = temp_qr.name
+    # QR Code (in memory)
+    qr_text = "http://yourdomain.com/export/report.pdf"
+    qr_img = qrcode.make(qr_text)
 
+    qr_buffer = io.BytesIO()
+    qr_img.save(qr_buffer, format="PNG")
+    qr_buffer.seek(0)
+
+    # Save QR temporarily in memory
     if pdf.get_y() > 230:
         pdf.add_page()
         pdf.rect(10, 10, 190, 277)
@@ -78,15 +80,11 @@ def export_to_pdf(name, age, gender, reports, summary):
     pdf.ln(10)
     pdf.set_font("Helvetica", style="B", size=12)
     pdf.cell(0, 10, "Scan to Download", ln=True)
-    pdf.image(qr_path, x=pdf.w - 60, y=pdf.get_y(), w=40)
+    pdf.image(qr_buffer, x=pdf.w - 60, y=pdf.get_y(), w=40, type='PNG')
 
-    # Temporary PDF output
-    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as temp_pdf:
-        output_path = temp_pdf.name
-        pdf.output(output_path)
+    # Export to in-memory PDF
+    output_buffer = io.BytesIO()
+    pdf.output(output_buffer)
+    output_buffer.seek(0)
 
-    # Clean up QR image
-    if os.path.exists(qr_path):
-        os.remove(qr_path)
-
-    return output_path
+    return output_buffer  # Use with st.download_button
