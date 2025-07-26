@@ -29,7 +29,7 @@ with col1:
 with col2:
     st.image(Image.open(logo2_path), width=350)
 
-st.title("👨‍⚕️ AI Medical Assistant")
+# st.title("👨‍⚕️ AI Medical Assistant")
 
 # ✅ Patient Info
 st.subheader("👤 Patient Information")
