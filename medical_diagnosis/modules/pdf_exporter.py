@@ -32,11 +32,11 @@ def export_to_pdf(name, age, gender, reports, summary):
             pdf.set_font("Helvetica", size=12)
         pdf.multi_cell(190, 10, txt=clean(text), border=border)
 
-    # Header
+    # ✅ Header
     pdf.cell(0, 10, "Medical Diagnosis Report", ln=True, align="C", border=1)
     pdf.cell(0, 10, clean(f"Name: {name} | Age: {age} | Gender: {gender}"), ln=True, border=1)
 
-    # Reports
+    # ✅ Reports
     for idx, report in enumerate(reports):
         pdf.ln(5)
         safe_add_line(f"--- Report {idx+1} ---", fill=True)
@@ -52,7 +52,7 @@ def export_to_pdf(name, age, gender, reports, summary):
             pdf.cell(60, 10, clean(val['status']), border=1)
             pdf.ln()
 
-    # Summary
+    # ✅ Summary
     pdf.ln(5)
     pdf.set_font("Helvetica", style="B", size=12)
     safe_add_line("--- Diagnosis Summary ---")
@@ -60,8 +60,8 @@ def export_to_pdf(name, age, gender, reports, summary):
     for line in summary.split('\n'):
         safe_add_multicell(line)
 
-    # ✅ Embed static QR
-    qr_path = os.path.join("static", "qr.png")
+    # ✅ Embed pre-generated static QR
+    qr_path = os.path.join("medical_diagnosis", "static", "qr.png")  # full path for local use
     if os.path.exists(qr_path):
         if pdf.get_y() > 230:
             pdf.add_page()
@@ -71,7 +71,7 @@ def export_to_pdf(name, age, gender, reports, summary):
         pdf.cell(0, 10, "Scan to Visit Diagnostics Assistant", ln=True)
         pdf.image(qr_path, x=pdf.w - 60, y=pdf.get_y(), w=40)
     else:
-        st.warning("⚠️ Static QR not found at static/qr.png")
+        st.warning("⚠️ Static QR not found at medical_diagnosis/static/qr.png")
 
     # ✅ In-memory PDF
     pdf_buffer = io.BytesIO()
