@@ -6,7 +6,6 @@ import os
 import uuid
 import requests
 import streamlit as st
-import json
 
 def export_to_pdf(name, age, gender, reports, summary):
     pdf = FPDF()
@@ -75,13 +74,16 @@ def export_to_pdf(name, age, gender, reports, summary):
     try:
         with open(local_path, "rb") as f:
             response = requests.post("https://file.io", files={"file": f})
-            content_type = response.headers.get("Content-Type", "")
-
-            if response.status_code == 200 and "application/json" in content_type:
-                response_json = response.json()
-                fileio_url = response_json.get("link")
+            if response.status_code == 200:
+                try:
+                    response_json = response.json()
+                    fileio_url = response_json.get("link")
+                except Exception as json_error:
+                    st.warning("⚠️ File.io responded but with invalid JSON.")
+                    st.text(response.text)
             else:
-                st.warning(f"⚠️ file.io upload returned unexpected content:\n{response.text}")
+                st.warning(f"⚠️ File.io error: {response.status_code}")
+                st.text(response.text)
     except Exception as e:
         st.error("❌ Failed to upload to file.io")
         st.exception(e)
@@ -106,7 +108,7 @@ def export_to_pdf(name, age, gender, reports, summary):
             st.warning("QR generation failed.")
             st.exception(e)
 
-    # Return in-memory buffer for Streamlit
+    # Return PDF buffer
     pdf_buffer = io.BytesIO()
     pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
