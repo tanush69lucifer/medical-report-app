@@ -19,12 +19,15 @@ local_css("style.css")
 # ✅ Page Config
 st.set_page_config(page_title="Diagnostics Assistant", layout="centered")
 
-# ✅ Display Logos (from static folder)
+# ✅ Display Logos using os.path and Image.open
+logo1_path = os.path.join(os.path.dirname(__file__), "static", "MEDONOSIS.png")
+logo2_path = os.path.join(os.path.dirname(__file__), "static", "Decode-Diagnose-Deliver.png")
+
 col1, col2 = st.columns([1, 1])
 with col1:
-    st.image("static/MEDONOSIS.png", width=300)
+    st.image(Image.open(logo1_path), width=300)
 with col2:
-    st.image("static/Decode-Diagnose-Deliver.png", width=350)
+    st.image(Image.open(logo2_path), width=350)
 
 st.title("👨‍⚕️ AI Medical Assistant")
 
