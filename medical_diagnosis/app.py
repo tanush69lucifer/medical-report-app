@@ -1,10 +1,10 @@
 import os
 import streamlit as st
+import base64
 from ocr_utils import extract_text
 from parser import extract_values
 from modules.rule_based_engine import interpret_results
 from modules.pdf_exporter import export_to_pdf
-import base64
 
 # ✅ Local CSS
 def local_css(file_name):
@@ -76,31 +76,26 @@ if uploaded_files:
 
         speak_text(summary.split("=== Recommendations ===")[0])
 
-        # ✅ Generate PDF + Save + QR path
-        pdf_buffer, saved_filename, qr_path = export_to_pdf(name, age, gender, all_reports, summary)
+        # ✅ Generate PDF, upload, QR
+        pdf_buffer, fileio_url, qr_path = export_to_pdf(name, age, gender, all_reports, summary)
 
-        # ✅ Download button (in-memory)
+        # ✅ Download (in-memory)
         st.markdown("### 📥 Download Report")
         st.download_button(
-            label="📄 Download PDF Report",
+            label="📄 Download PDF Report (Direct)",
             data=pdf_buffer,
             file_name="report.pdf",
             mime="application/pdf"
         )
 
-        # ✅ Extra link to saved PDF
-        try:
-            with open(f"export/{saved_filename}", "rb") as f:
-                b64 = base64.b64encode(f.read()).decode()
-                st.markdown(
-                    f"📥 [Click to download PDF](data:application/octet-stream;base64,{b64})",
-                    unsafe_allow_html=True
-                )
-        except FileNotFoundError:
-            st.warning("Saved PDF not found. Please check export path.")
-
-        # ✅ Show QR code
-        if os.path.exists(qr_path):
-            st.image(qr_path, caption="Scan to download")
+        # ✅ One-time file.io link
+        if fileio_url:
+            st.markdown(f"🔗 [Click for One-Time Link]({fileio_url})", unsafe_allow_html=True)
         else:
-            st.info("QR not found. Make sure it's saved during PDF generation.")
+            st.error("❌ Failed to generate one-time link.")
+
+        # ✅ Show QR
+        if os.path.exists(qr_path):
+            st.image(qr_path, caption="📲 Scan to Download (One-Time Link)")
+        else:
+            st.info("QR not found.")
