@@ -1,7 +1,8 @@
 from fpdf import FPDF
 import qrcode
-import os
+import tempfile
 import re
+import os
 
 def export_to_pdf(name, age, gender, reports, summary):
     pdf = FPDF()
@@ -64,13 +65,11 @@ def export_to_pdf(name, age, gender, reports, summary):
     for line in summary.split('\n'):
         safe_add_multicell(line)
 
-    # Add QR Code
-    qr_text = "http://yourdomain.com/export/report.pdf"  # <-- Replace with actual link
-    qr_img = qrcode.make(qr_text)
-
-    os.makedirs("export", exist_ok=True)  # ✅ Ensure folder exists
-    qr_path = "export/qr_temp.png"
-    qr_img.save(qr_path)
+    # Temporary QR image
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_qr:
+        qr_img = qrcode.make("http://yourdomain.com/export/report.pdf")
+        qr_img.save(temp_qr.name)
+        qr_path = temp_qr.name
 
     if pdf.get_y() > 230:
         pdf.add_page()
@@ -81,10 +80,13 @@ def export_to_pdf(name, age, gender, reports, summary):
     pdf.cell(0, 10, "Scan to Download", ln=True)
     pdf.image(qr_path, x=pdf.w - 60, y=pdf.get_y(), w=40)
 
-    # Export PDF
-    output_path = "export/report.pdf"
-    pdf.output(output_path)
+    # Temporary PDF output
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as temp_pdf:
+        output_path = temp_pdf.name
+        pdf.output(output_path)
 
     # Clean up QR image
     if os.path.exists(qr_path):
         os.remove(qr_path)
+
+    return output_path
