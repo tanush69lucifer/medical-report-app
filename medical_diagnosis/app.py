@@ -76,10 +76,10 @@ if uploaded_files:
 
         speak_text(summary.split("=== Recommendations ===")[0])
 
-        # ✅ In-memory PDF export
-        pdf_buffer = export_to_pdf(name, age, gender, all_reports, summary)
+        # ✅ Generate PDF + Save + QR path
+        pdf_buffer, saved_filename, qr_path = export_to_pdf(name, age, gender, all_reports, summary)
 
-        # ✅ Streamlit download button
+        # ✅ Download button (in-memory)
         st.markdown("### 📥 Download Report")
         st.download_button(
             label="📄 Download PDF Report",
@@ -88,6 +88,19 @@ if uploaded_files:
             mime="application/pdf"
         )
 
-        # ✅ Dummy QR for visual purpose
-        qr_url = "https://api.qrserver.com/v1/create-qr-code/?data=report.pdf&size=150x150"
-        st.image(qr_url, caption="Scan to Download (static link)")
+        # ✅ Extra link to saved PDF
+        try:
+            with open(f"export/{saved_filename}", "rb") as f:
+                b64 = base64.b64encode(f.read()).decode()
+                st.markdown(
+                    f"📥 [Click to download PDF](data:application/octet-stream;base64,{b64})",
+                    unsafe_allow_html=True
+                )
+        except FileNotFoundError:
+            st.warning("Saved PDF not found. Please check export path.")
+
+        # ✅ Show QR code
+        if os.path.exists(qr_path):
+            st.image(qr_path, caption="Scan to download")
+        else:
+            st.info("QR not found. Make sure it's saved during PDF generation.")
