@@ -6,6 +6,7 @@ import os
 import uuid
 import requests
 import streamlit as st
+import json
 
 def export_to_pdf(name, age, gender, reports, summary):
     pdf = FPDF()
@@ -69,39 +70,43 @@ def export_to_pdf(name, age, gender, reports, summary):
     local_path = f"export/report_{uuid.uuid4().hex[:8]}.pdf"
     pdf.output(local_path)
 
-    # Upload to file.io
+    # Upload to file.io safely
+    fileio_url = None
     try:
         with open(local_path, "rb") as f:
             response = requests.post("https://file.io", files={"file": f})
-        if response.status_code == 200 and "application/json" in response.headers.get("Content-Type", ""):
-            response_json = response.json()
-            fileio_url = response_json.get("link")
-        else:
-            st.error(f"⚠️ File.io upload failed (code {response.status_code})")
-            st.warning(response.text)
-            fileio_url = None
+            content_type = response.headers.get("Content-Type", "")
+
+            if response.status_code == 200 and "application/json" in content_type:
+                response_json = response.json()
+                fileio_url = response_json.get("link")
+            else:
+                st.warning(f"⚠️ file.io upload returned unexpected content:\n{response.text}")
     except Exception as e:
-        st.error("⚠️ Error uploading to file.io")
+        st.error("❌ Failed to upload to file.io")
         st.exception(e)
-        fileio_url = None
 
     # Generate QR
     qr_path = "export/qr.png"
     if fileio_url:
-        qr_img = qrcode.make(fileio_url)
-        qr_img.save(qr_path)
+        try:
+            qr_img = qrcode.make(fileio_url)
+            qr_img.save(qr_path)
 
-        # Add QR to PDF
-        if pdf.get_y() > 230:
-            pdf.add_page()
-            pdf.rect(10, 10, 190, 277)
+            # Add QR to PDF
+            if pdf.get_y() > 230:
+                pdf.add_page()
+                pdf.rect(10, 10, 190, 277)
 
-        pdf.ln(10)
-        pdf.set_font("Helvetica", style="B", size=12)
-        pdf.cell(0, 10, "Scan to Download", ln=True)
-        pdf.image(qr_path, x=pdf.w - 60, y=pdf.get_y(), w=40)
+            pdf.ln(10)
+            pdf.set_font("Helvetica", style="B", size=12)
+            pdf.cell(0, 10, "Scan to Download", ln=True)
+            pdf.image(qr_path, x=pdf.w - 60, y=pdf.get_y(), w=40)
+        except Exception as e:
+            st.warning("QR generation failed.")
+            st.exception(e)
 
-    # Final buffer for Streamlit
+    # Return in-memory buffer for Streamlit
     pdf_buffer = io.BytesIO()
     pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
