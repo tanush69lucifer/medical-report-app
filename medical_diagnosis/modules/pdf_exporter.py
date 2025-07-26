@@ -101,7 +101,7 @@ def export_to_pdf(name, age, gender, reports, summary):
             st.warning("QR generation failed.")
             st.exception(e)
 
-    # ✅ In-memory return
+    # ✅ In-memory PDF
     pdf_buffer = io.BytesIO()
     pdf_bytes = pdf.output(dest="S").encode("latin-1")
     pdf_buffer.write(pdf_bytes)
