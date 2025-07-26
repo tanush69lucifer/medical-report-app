@@ -1,17 +1,188 @@
 {
-  "Liver enzyme imbalance": [
-    { "name": "Liv 52", "dose": "2 tablets", "duration": "10 days" }
-  ],
-  "Possible jaundice or liver dysfunction": [
-    { "name": "Silymarin", "dose": "140mg", "duration": "14 days" }
-  ],
-  "Bone or bile duct issues": [
-    { "name": "Calcimax", "dose": "1 tablet", "duration": "30 days" }
-  ],
-  "High Creatinine": [
-    { "name": "Ketosteril", "dose": "2 tablets", "duration": "15 days" }
-  ],
-  "High WBC": [
-    { "name": "Azithromycin", "dose": "500mg", "duration": "3 days" }
-  ]
+  "Liver enzyme imbalance": {
+    "0-12": [
+      {
+        "name": "Liv 52 Syrup",
+        "dose": "5 ml twice daily",
+        "duration": "7 days",
+        "comorbidities": {}
+      }
+    ],
+    "13-60": [
+      {
+        "name": "Liv 52",
+        "dose": "2 tablets twice daily",
+        "duration": "10 days",
+        "comorbidities": {
+          "diabetes": {
+            "dose": "1 tablet twice daily",
+            "duration": "14 days"
+          },
+          "kidney_disease": {
+            "avoid": true
+          }
+        }
+      }
+    ],
+    "60+": [
+      {
+        "name": "Liv 52",
+        "dose": "1 tablet twice daily",
+        "duration": "14 days",
+        "comorbidities": {
+          "hypertension": {
+            "monitor": "Monitor BP daily"
+          }
+        }
+      }
+    ]
+  },
+
+  "High Creatinine": {
+    "0-12": [
+      {
+        "name": "Consult Pediatric Nephrologist",
+        "dose": "-",
+        "duration": "-",
+        "comorbidities": {}
+      }
+    ],
+    "13-60": [
+      {
+        "name": "Ketosteril",
+        "dose": "2 tablets thrice daily",
+        "duration": "15 days",
+        "comorbidities": {
+          "diabetes": {
+            "dose": "1 tablet thrice daily",
+            "duration": "20 days"
+          },
+          "heart_disease": {
+            "monitor": "Weekly ECG monitoring"
+          }
+        }
+      }
+    ],
+    "60+": [
+      {
+        "name": "Ketosteril",
+        "dose": "1 tablet twice daily",
+        "duration": "20 days",
+        "comorbidities": {
+          "kidney_disease": {
+            "dose": "Every other day",
+            "note": "Strict nephrology supervision"
+          }
+        }
+      }
+    ]
+  },
+
+  "Possible jaundice or liver dysfunction": {
+    "0-12": [
+      {
+        "name": "Silymarin Syrup",
+        "dose": "5 ml twice daily",
+        "duration": "7 days",
+        "comorbidities": {}
+      }
+    ],
+    "13-60": [
+      {
+        "name": "Silymarin",
+        "dose": "140 mg twice daily",
+        "duration": "14 days",
+        "comorbidities": {
+          "diabetes": {
+            "note": "Monitor blood glucose closely"
+          }
+        }
+      }
+    ],
+    "60+": [
+      {
+        "name": "Silymarin",
+        "dose": "70 mg twice daily",
+        "duration": "14 days",
+        "comorbidities": {
+          "hypertension": {
+            "avoid": true
+          }
+        }
+      }
+    ]
+  },
+
+  "High WBC": {
+    "0-12": [
+      {
+        "name": "Amoxicillin Syrup",
+        "dose": "10 ml twice daily",
+        "duration": "5 days",
+        "comorbidities": {}
+      }
+    ],
+    "13-60": [
+      {
+        "name": "Azithromycin",
+        "dose": "500 mg once daily",
+        "duration": "3 days",
+        "comorbidities": {
+          "asthma": {
+            "note": "Consider bronchodilator use if wheezing"
+          }
+        }
+      }
+    ],
+    "60+": [
+      {
+        "name": "Azithromycin",
+        "dose": "250 mg once daily",
+        "duration": "5 days",
+        "comorbidities": {
+          "heart_disease": {
+            "monitor": "QT interval via ECG"
+          }
+        }
+      }
+    ]
+  },
+
+  "Bone or bile duct issues": {
+    "0-12": [
+      {
+        "name": "Calcimax P Syrup",
+        "dose": "5 ml twice daily after meals",
+        "duration": "30 days",
+        "comorbidities": {}
+      }
+    ],
+    "13-60": [
+      {
+        "name": "Calcimax Forte",
+        "dose": "1 tablet daily with food",
+        "duration": "30 days",
+        "comorbidities": {
+          "osteoporosis": {
+            "note": "Combine with Vitamin D3 (cholecalciferol)"
+          }
+        }
+      }
+    ],
+    "60+": [
+      {
+        "name": "Calcimax 500",
+        "dose": "1 tablet morning and night",
+        "duration": "45 days",
+        "comorbidities": {
+          "kidney_disease": {
+            "monitor": "Calcium levels weekly; risk of calcification"
+          },
+          "gallbladder_issues": {
+            "avoid": true
+          }
+        }
+      }
+    ]
+  }
 }
