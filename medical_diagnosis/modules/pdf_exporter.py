@@ -1,8 +1,8 @@
 from fpdf import FPDF
 import qrcode
-import tempfile
-import os
+import io
 import re
+import os
 
 def export_to_pdf(name, age, gender, reports, summary):
     pdf = FPDF()
@@ -65,14 +65,17 @@ def export_to_pdf(name, age, gender, reports, summary):
     for line in summary.split('\n'):
         safe_add_multicell(line)
 
-    # QR Code using tempfile
-    qr_text = "http://yourdomain.com/export/report.pdf"
+    # QR Code (saved as file and used in PDF)
+    qr_text = "https://yourdomain.com/export/report.pdf"
     qr_img = qrcode.make(qr_text)
 
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_qr:
-        qr_path = tmp_qr.name
-        qr_img.save(qr_path)
+    # Ensure folder exists
+    os.makedirs("export", exist_ok=True)
 
+    qr_path = "export/qr.png"
+    qr_img.save(qr_path)
+
+    # Add to PDF
     if pdf.get_y() > 230:
         pdf.add_page()
         pdf.rect(10, 10, 190, 277)
@@ -82,9 +85,12 @@ def export_to_pdf(name, age, gender, reports, summary):
     pdf.cell(0, 10, "Scan to Download", ln=True)
     pdf.image(qr_path, x=pdf.w - 60, y=pdf.get_y(), w=40)
 
-    # Clean up temp QR file
-    os.remove(qr_path)
+    # Save PDF to file
+    pdf_file_path = "export/report.pdf"
+    pdf.output(pdf_file_path)
 
-    # Export PDF to file
-    os.makedirs("export", exist_ok=True)
-    pdf.output("export/report.pdf")
+    # Return in-memory buffer
+    output_buffer = io.BytesIO()
+    pdf.output(output_buffer)
+    output_buffer.seek(0)
+    return output_buffer
