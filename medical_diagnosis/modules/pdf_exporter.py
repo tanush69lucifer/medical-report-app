@@ -62,7 +62,7 @@ def export_to_pdf(name, age, gender, reports, summary):
     for line in summary.split('\n'):
         safe_add_multicell(line)
 
-    # ✅ Generate QR to app URL
+    # ✅ Add QR to app homepage
     app_url = "https://tanush69lucifer-medical-report-app.streamlit.app"
     qr_path = "export/qr.png"
     os.makedirs("export", exist_ok=True)
@@ -82,7 +82,7 @@ def export_to_pdf(name, age, gender, reports, summary):
         st.warning("QR generation failed.")
         st.exception(e)
 
-    # ✅ Return in-memory
+    # ✅ In-memory PDF
     pdf_buffer = io.BytesIO()
     pdf_bytes = pdf.output(dest="S").encode("latin-1")
     pdf_buffer.write(pdf_bytes)
