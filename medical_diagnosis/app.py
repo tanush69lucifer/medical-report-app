@@ -9,18 +9,12 @@ from modules.pdf_exporter import export_to_pdf
 
 # ✅ Load Local CSS
 def local_css(file_name):
-    css_path = os.path.join(os.path.dirname(__file__), file_name)
+    css_path = os.path.join("static", file_name)
     if os.path.exists(css_path):
         with open(css_path) as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-local_css("static/style.css")
-
-# ✅ Text-to-Speech Stub (Optional)
-def speak_text(text):
-    escaped = text.replace('"', r'\"').replace('\n', ' ')
-    # Placeholder: Implement your TTS here if needed
-    pass
+local_css("style.css")
 
 # ✅ Page Config
 st.set_page_config(page_title="Diagnostics Assistant", layout="centered")
@@ -28,9 +22,9 @@ st.set_page_config(page_title="Diagnostics Assistant", layout="centered")
 # ✅ Display Logos (from static folder)
 col1, col2 = st.columns([1, 1])
 with col1:
-    st.image(Image.open("static/MEDONOSIS.png"), width=300)
+    st.image("static/MEDONOSIS.png", width=300)
 with col2:
-    st.image(Image.open("static/Decode-Diagnose-Delive.png"), width=350)
+    st.image("static/Decode-Diagnose-Deliver.png", width=350)
 
 st.title("👨‍⚕️ AI Medical Assistant")
 
@@ -73,8 +67,6 @@ if uploaded_files:
         </div>
         """, unsafe_allow_html=True)
 
-        speak_text(summary.split("=== Recommendations ===")[0])
-
         # ✅ Generate PDF with QR
         pdf_buffer, app_url, qr_path = export_to_pdf(name, age, gender, all_reports, summary)
 
@@ -91,5 +83,5 @@ if uploaded_files:
         if os.path.exists(qr_path):
             st.image(qr_path, caption="📲 Scan to Open Diagnostics Assistant")
 
-        # ✅ App Link (Optional)
+        # ✅ App Link
         st.markdown(f"🔗 [Visit Diagnostics Assistant]({app_url})", unsafe_allow_html=True)
