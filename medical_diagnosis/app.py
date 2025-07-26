@@ -28,13 +28,14 @@ def speak_text(text):
 # ✅ Page Config
 st.set_page_config(page_title="Diagnostics Assistant", layout="centered")
 
-st.title("👨‍⚕️ AI Medical Assistant")
-st.markdown(
-    '<div class="bot-avatar">'
-    '<img src="https://media.giphy.com/media/UHAYP0FxJOmFBuOiC2/giphy.gif">'
-    '</div>',
-    unsafe_allow_html=True
-)
+# ✅ App Header
+st.markdown("""
+    <div style="text-align:center; padding:10px;">
+        <img src="static/MEDONOSIS.png" width="200"/>
+        <h1 style="font-family:'Segoe UI',sans-serif; margin:10px 0;">MEDONOSIS</h1>
+        <h4 style="color:gray; font-family:'Segoe UI',sans-serif;">Decode • Diagnose • Deliver</h4>
+    </div>
+""", unsafe_allow_html=True)
 
 # ✅ Patient Info
 st.subheader("👤 Patient Information")
