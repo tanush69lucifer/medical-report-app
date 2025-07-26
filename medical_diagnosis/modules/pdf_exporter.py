@@ -17,9 +17,8 @@ def export_to_pdf(name, age, gender, reports, summary):
 
     def clean(text):
         text = str(text)
-        replacements = {"⚠": "[!]", "✓": "[OK]", "♥": "<3"}
-        for symbol, replacement in replacements.items():
-            text = text.replace(symbol, replacement)
+        for sym, rep in {"⚠": "[!]", "✓": "[OK]", "♥": "<3"}.items():
+            text = text.replace(sym, rep)
         return re.sub(r'[^\x00-\x7F]', '', text)
 
     def safe_add_line(text, border=1, ln=True, fill=False):
@@ -64,28 +63,23 @@ def export_to_pdf(name, age, gender, reports, summary):
     for line in summary.split('\n'):
         safe_add_multicell(line)
 
-    # Save PDF locally
+    # Save locally
     os.makedirs("export", exist_ok=True)
     local_path = f"export/report_{uuid.uuid4().hex[:8]}.pdf"
     pdf.output(local_path)
 
-    # Upload to file.io safely
+    # Upload to file.io
     fileio_url = None
     try:
         with open(local_path, "rb") as f:
             response = requests.post("https://file.io", files={"file": f})
-            if response.status_code == 200:
-                try:
-                    response_json = response.json()
-                    fileio_url = response_json.get("link")
-                except Exception as json_error:
-                    st.warning("⚠️ File.io responded but with invalid JSON.")
-                    st.text(response.text)
+            if response.status_code == 200 and "application/json" in response.headers.get("Content-Type", ""):
+                fileio_url = response.json().get("link")
             else:
-                st.warning(f"⚠️ File.io error: {response.status_code}")
+                st.warning("⚠️ Unexpected response from file.io:")
                 st.text(response.text)
     except Exception as e:
-        st.error("❌ Failed to upload to file.io")
+        st.error("❌ File upload failed.")
         st.exception(e)
 
     # Generate QR
@@ -95,7 +89,6 @@ def export_to_pdf(name, age, gender, reports, summary):
             qr_img = qrcode.make(fileio_url)
             qr_img.save(qr_path)
 
-            # Add QR to PDF
             if pdf.get_y() > 230:
                 pdf.add_page()
                 pdf.rect(10, 10, 190, 277)
@@ -108,7 +101,7 @@ def export_to_pdf(name, age, gender, reports, summary):
             st.warning("QR generation failed.")
             st.exception(e)
 
-    # Return PDF buffer
+    # Return in-memory buffer
     pdf_buffer = io.BytesIO()
     pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
