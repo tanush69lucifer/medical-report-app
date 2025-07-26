@@ -29,12 +29,17 @@ def speak_text(text):
 st.set_page_config(page_title="Diagnostics Assistant", layout="centered")
 
 # ✅ App Header
+st.markdown("""<div style="text-align:center; padding:10px;">""", unsafe_allow_html=True)
+
+# 📷 Display PNG from static folder
+medonosis_img_path = os.path.join("static", "MEDONOSIS.png")
+if os.path.exists(medonosis_img_path):
+    st.image(medonosis_img_path, width=200)
+
 st.markdown("""
-    <div style="text-align:center; padding:10px;">
-        <img src="static/MEDONOSIS.png" width="200"/>
-        <h1 style="font-family:'Segoe UI',sans-serif; margin:10px 0;">MEDONOSIS</h1>
-        <h4 style="color:gray; font-family:'Segoe UI',sans-serif;">Decode • Diagnose • Deliver</h4>
-    </div>
+    <h1 style="font-family:'Segoe UI',sans-serif; margin:10px 0;">MEDONOSIS</h1>
+    <h4 style="color:gray; font-family:'Segoe UI',sans-serif;">Decode • Diagnose • Deliver</h4>
+</div>
 """, unsafe_allow_html=True)
 
 # ✅ Patient Info
@@ -92,6 +97,6 @@ if uploaded_files:
         # ✅ Show QR to app
         if os.path.exists(qr_path):
             st.image(qr_path, caption="📲 Scan to Open Diagnostics Assistant")
-        
-        # ✅ App link (optional)
+
+        # ✅ App link
         st.markdown(f"🔗 [Visit Diagnostics Assistant]({app_url})", unsafe_allow_html=True)
