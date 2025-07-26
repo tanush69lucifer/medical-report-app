@@ -6,7 +6,7 @@ from modules.rule_based_engine import interpret_results
 from modules.pdf_exporter import export_to_pdf
 import base64
 
-# ✅ Cleaned local_css function
+# ✅ Local CSS
 def local_css(file_name):
     css_path = os.path.join(os.path.dirname(__file__), file_name)
     if os.path.exists(css_path):
@@ -15,7 +15,7 @@ def local_css(file_name):
 
 local_css("static/style.css")
 
-# For speech synthesis
+# ✅ Text-to-Speech
 def speak_text(text):
     escaped = text.replace('"', r'\"').replace('\n', ' ')
     st.markdown(f'''
@@ -25,7 +25,7 @@ def speak_text(text):
         </script>
     ''', unsafe_allow_html=True)
 
-
+# ✅ Page Config
 st.set_page_config(page_title="Diagnostics Assistant", layout="centered")
 
 st.title("👨‍⚕️ AI Medical Assistant")
@@ -36,7 +36,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Patient Info
+# ✅ Patient Info
 st.subheader("👤 Patient Information")
 name = st.text_input("Full Name")
 age = st.number_input("Age", min_value=1, max_value=120)
@@ -44,7 +44,7 @@ gender = st.selectbox("Gender", ["Male", "Female", "Other"])
 conditions = st.text_area("Known Conditions")
 date = st.date_input("Report Date")
 
-# Upload and extract
+# ✅ Upload Report
 st.subheader("📑 Upload Report Image")
 uploaded_files = st.file_uploader("Upload", accept_multiple_files=True, type=["jpg", "jpeg", "png"])
 
@@ -65,8 +65,8 @@ if uploaded_files:
 
     if st.button("🧠 Diagnose & Generate PDF"):
         summary = interpret_results(all_reports, age=age, gender=gender, conditions=conditions)
-        st.markdown("### 🩺 AI Diagnosis Summary")
 
+        st.markdown("### 🩺 AI Diagnosis Summary")
         safe_summary = summary.replace('\n', '<br>')
         st.markdown(f"""
          <div style='background-color:#e8f0fe; padding:15px; border-radius:10px; font-family:Segoe UI; color:#000; text-align:center;'>
@@ -75,13 +75,19 @@ if uploaded_files:
          """, unsafe_allow_html=True)
 
         speak_text(summary.split("=== Recommendations ===")[0])
-        export_to_pdf(name, age, gender, all_reports, summary)
 
-        st.image("https://api.qrserver.com/v1/create-qr-code/?data=report.pdf&size=150x150", caption="Scan to Download")
+        # ✅ In-memory PDF export
+        pdf_buffer = export_to_pdf(name, age, gender, all_reports, summary)
 
-        with open("export/report.pdf", "rb") as pdf_file:
-            b64 = base64.b64encode(pdf_file.read()).decode()
-            st.markdown(
-                f"📥 [Click to download PDF](data:application/octet-stream;base64,{b64})",
-                unsafe_allow_html=True
-            )
+        # ✅ Streamlit download button
+        st.markdown("### 📥 Download Report")
+        st.download_button(
+            label="📄 Download PDF Report",
+            data=pdf_buffer,
+            file_name="report.pdf",
+            mime="application/pdf"
+        )
+
+        # ✅ Dummy QR for visual purpose
+        qr_url = "https://api.qrserver.com/v1/create-qr-code/?data=report.pdf&size=150x150"
+        st.image(qr_url, caption="Scan to Download (static link)")
