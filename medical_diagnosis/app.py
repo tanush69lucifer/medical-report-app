@@ -88,8 +88,9 @@ if uploaded_files:
             mime="application/pdf"
         )
 
-        # ✅ Show QR image (static app QR)
+        # ✅ Show QR to app
         if os.path.exists(qr_path):
             st.image(qr_path, caption="📲 Scan to Open Diagnostics Assistant")
-        else:
-            st.info("QR not found.")
+        
+        # ✅ App link (optional)
+        st.markdown(f"🔗 [Visit Diagnostics Assistant]({app_url})", unsafe_allow_html=True)
