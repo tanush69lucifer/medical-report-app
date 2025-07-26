@@ -33,13 +33,47 @@ def interpret_results(report_list, age=0, gender="N/A", conditions="None"):
     summary = "\n\n=== Summary of Findings ===\n"
     summary += "\n".join([f"- {issue}" for issue in overall_findings]) if overall_findings else "All values normal.\n"
 
-    summary += "\n\n=== Medication Plan ===\n"
+       summary += "\n\n=== Medication Plan ===\n"
+    comorb_list = [c.strip().lower() for c in conditions.split(",") if c.strip()]
     for issue in overall_findings:
         if issue in med_data:
-            for med in med_data[issue]:
-                summary += f"- {med['name']}: {med['dose']} for {med['duration']}\n"
+            # Age Grouping
+            if age <= 12:
+                age_group = "0-12"
+            elif age <= 60:
+                age_group = "13-60"
+            else:
+                age_group = "60+"
+
+            treatments = med_data[issue].get(age_group, [])
+            if not treatments:
+                summary += f"- {issue}: No treatment found for age group.\n"
+                continue
+
+            for med in treatments:
+                name = med.get("name", "Unknown")
+                dose = med.get("dose", "N/A")
+                duration = med.get("duration", "N/A")
+                note = ""
+
+                # Check comorbidities
+                if "comorbidities" in med:
+                    for comorb in comorb_list:
+                        c_info = med["comorbidities"].get(comorb)
+                        if c_info:
+                            if c_info.get("avoid"):
+                                note += f"❌ Avoid due to {comorb}. "
+                                continue
+                            dose = c_info.get("dose", dose)
+                            duration = c_info.get("duration", duration)
+                            note += c_info.get("note", "")
+                            if "monitor" in c_info:
+                                note += f"Monitor: {c_info['monitor']}. "
+
+                summary += f"- {name}: {dose} for {duration}. {note}\n"
         else:
-            summary += f"- {issue}: No fixed medication. Consult your doctor.\n"
+            summary += f"- {issue}: No medication guidance available.\n"
+
 
     summary += """
 \n=== Recommendations ===
