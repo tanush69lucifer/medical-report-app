@@ -1,5 +1,8 @@
-# medical-report-app
-An easy-to-use AI tool that reads your medical reports, explains key health markers, points out anything unusual, and gives you a clear summary with helpful suggestions. Quick, reliable, and comes with a QR code so you can access or share your report anytime, anywhere
+# MEDONOSIS 
+An easy to use tool that reads your medical reports, explains key health markers, highlights anything unusual, and gives you a clear summary with helpful suggestions.
+It’s quick, reliable, and even provides a QR code so you can access or share your report anytime, anywhere.
+This system is built on smart rule-based logic and structured medical knowledge — no AI or black-box decisions involved. Everything is transparent, interpretable, and focused on clarity.
+
 
 Interact with the diagnosis system in real-time:
 https://medical-report-app-5xsq3heowmewh8zmrrqf29.streamlit.app/
