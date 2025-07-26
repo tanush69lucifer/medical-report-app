@@ -29,12 +29,12 @@ def speak_text(text):
 st.set_page_config(page_title="Diagnostics Assistant", layout="centered")
 
 # ✅ App Header
+st.markdown("""<div style="text-align:center; padding:10px;">""", unsafe_allow_html=True)
+st.image("static/MEDONOSIS.png", width=200)
 st.markdown("""
-    <div style="text-align:center; padding:10px;">
-        <img src="static/MEDONOSIS.png" width="200"/>
-        <h1 style="font-family:'Segoe UI',sans-serif; margin:10px 0;">MEDONOSIS</h1>
-        <h4 style="color:gray; font-family:'Segoe UI',sans-serif;">Decode • Diagnose • Deliver</h4>
-    </div>
+    <h1 style="font-family:'Segoe UI',sans-serif; margin:10px 0;">MEDONOSIS</h1>
+    <h4 style="color:gray; font-family:'Segoe UI',sans-serif;">Decode • Diagnose • Deliver</h4>
+</div>
 """, unsafe_allow_html=True)
 
 # ✅ Patient Info
