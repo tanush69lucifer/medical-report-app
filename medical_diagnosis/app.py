@@ -19,12 +19,14 @@ local_css("style.css")
 # ✅ Page Config
 st.set_page_config(page_title="Diagnostics Assistant", layout="centered")
 
-# ✅ Display Centered MEDONOSIS and tagline
-medonosis_logo = os.path.join("static", "MEDONOSIS.png")
-tagline_logo = os.path.join("static", "Decode-Diagnose-Deliver.png")
+# ✅ Display Logos (No __file__ to avoid path issues)
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    st.image("static/MEDONOSIS.png", width=300)
+    st.image("static/Decode-Diagnose-Deliver.png", width=350)
 
-st.image(Image.open(medonosis_logo), width=300, use_column_width=False)
-st.image(Image.open(tagline_logo), width=350, use_column_width=False)
+# ✅ Title removed, only logos
+# st.title("👨‍⚕️ AI Medical Assistant")
 
 # ✅ Patient Info
 st.subheader("👤 Patient Information")
