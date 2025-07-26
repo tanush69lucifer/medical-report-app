@@ -1,9 +1,7 @@
 from fpdf import FPDF
-import qrcode
 import io
 import re
 import os
-import uuid
 import streamlit as st
 
 def export_to_pdf(name, age, gender, reports, summary):
@@ -62,25 +60,18 @@ def export_to_pdf(name, age, gender, reports, summary):
     for line in summary.split('\n'):
         safe_add_multicell(line)
 
-    # ✅ Add QR to app homepage
-    app_url = "https://tanush69lucifer-medical-report-app.streamlit.app"
-    qr_path = "export/qr.png"
-    os.makedirs("export", exist_ok=True)
-    try:
-        qr_img = qrcode.make(app_url)
-        qr_img.save(qr_path)
-
+    # ✅ Embed static QR
+    qr_path = os.path.join("static", "qr.png")
+    if os.path.exists(qr_path):
         if pdf.get_y() > 230:
             pdf.add_page()
             pdf.rect(10, 10, 190, 277)
-
         pdf.ln(10)
         pdf.set_font("Helvetica", style="B", size=12)
         pdf.cell(0, 10, "Scan to Visit Diagnostics Assistant", ln=True)
         pdf.image(qr_path, x=pdf.w - 60, y=pdf.get_y(), w=40)
-    except Exception as e:
-        st.warning("QR generation failed.")
-        st.exception(e)
+    else:
+        st.warning("⚠️ Static QR not found at static/qr.png")
 
     # ✅ In-memory PDF
     pdf_buffer = io.BytesIO()
@@ -88,4 +79,5 @@ def export_to_pdf(name, age, gender, reports, summary):
     pdf_buffer.write(pdf_bytes)
     pdf_buffer.seek(0)
 
+    app_url = "https://medical-report-app-5xsq3heowmewh8zmrrqf29.streamlit.app"
     return pdf_buffer, app_url, qr_path
