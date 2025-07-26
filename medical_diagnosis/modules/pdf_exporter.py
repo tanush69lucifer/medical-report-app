@@ -68,21 +68,21 @@ def export_to_pdf(name, age, gender, reports, summary):
     local_path = f"export/report_{uuid.uuid4().hex[:8]}.pdf"
     pdf.output(local_path)
 
-    # Upload to file.io
+    # ✅ Upload to transfer.sh
     fileio_url = None
     try:
         with open(local_path, "rb") as f:
-            response = requests.post("https://file.io", files={"file": f})
-            if response.status_code == 200 and "application/json" in response.headers.get("Content-Type", ""):
-                fileio_url = response.json().get("link")
+            response = requests.put(f"https://transfer.sh/{os.path.basename(local_path)}", data=f)
+            if response.status_code == 200:
+                fileio_url = response.text.strip()
             else:
-                st.warning("⚠️ Unexpected response from file.io:")
+                st.warning(f"⚠️ transfer.sh upload error: {response.status_code}")
                 st.text(response.text)
     except Exception as e:
-        st.error("❌ File upload failed.")
+        st.error("❌ Failed to upload to transfer.sh")
         st.exception(e)
 
-    # Generate QR
+    # ✅ Generate QR code
     qr_path = "export/qr.png"
     if fileio_url:
         try:
@@ -101,7 +101,7 @@ def export_to_pdf(name, age, gender, reports, summary):
             st.warning("QR generation failed.")
             st.exception(e)
 
-    # Return in-memory buffer
+    # ✅ In-memory return
     pdf_buffer = io.BytesIO()
     pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
