@@ -3,6 +3,8 @@ import qrcode
 import io
 import re
 import os
+import uuid
+import requests
 
 def export_to_pdf(name, age, gender, reports, summary):
     pdf = FPDF()
@@ -48,10 +50,6 @@ def export_to_pdf(name, age, gender, reports, summary):
         pdf.ln()
         pdf.set_font("Helvetica", size=11)
         for param, val in report.items():
-            if pdf.get_y() > 260:
-                pdf.add_page()
-                pdf.rect(10, 10, 190, 277)
-                pdf.set_font("Helvetica", size=11)
             pdf.cell(60, 10, clean(param), border=1)
             pdf.cell(60, 10, clean(str(val['value'])), border=1)
             pdf.cell(60, 10, clean(val['status']), border=1)
@@ -65,32 +63,36 @@ def export_to_pdf(name, age, gender, reports, summary):
     for line in summary.split('\n'):
         safe_add_multicell(line)
 
-    # QR Code (saved as file and used in PDF)
-    qr_text = "https://yourdomain.com/export/report.pdf"
-    qr_img = qrcode.make(qr_text)
-
-    # Ensure folder exists
     os.makedirs("export", exist_ok=True)
 
+    # Save locally first
+    local_path = f"export/report_{uuid.uuid4().hex[:8]}.pdf"
+    pdf.output(local_path)
+
+    # Upload to File.io
+    with open(local_path, "rb") as f:
+        response = requests.post("https://file.io", files={"file": f})
+        fileio_url = response.json().get("link")
+
+    # Generate QR from file.io URL
     qr_path = "export/qr.png"
-    qr_img.save(qr_path)
+    if fileio_url:
+        qr_img = qrcode.make(fileio_url)
+        qr_img.save(qr_path)
 
-    # Add to PDF
-    if pdf.get_y() > 230:
-        pdf.add_page()
-        pdf.rect(10, 10, 190, 277)
+        # Add to PDF
+        if pdf.get_y() > 230:
+            pdf.add_page()
+            pdf.rect(10, 10, 190, 277)
 
-    pdf.ln(10)
-    pdf.set_font("Helvetica", style="B", size=12)
-    pdf.cell(0, 10, "Scan to Download", ln=True)
-    pdf.image(qr_path, x=pdf.w - 60, y=pdf.get_y(), w=40)
+        pdf.ln(10)
+        pdf.set_font("Helvetica", style="B", size=12)
+        pdf.cell(0, 10, "Scan to Download", ln=True)
+        pdf.image(qr_path, x=pdf.w - 60, y=pdf.get_y(), w=40)
 
-    # Save PDF to file
-    pdf_file_path = "export/report.pdf"
-    pdf.output(pdf_file_path)
+    # Return buffer for download
+    pdf_buffer = io.BytesIO()
+    pdf.output(pdf_buffer)
+    pdf_buffer.seek(0)
 
-    # Return in-memory buffer
-    output_buffer = io.BytesIO()
-    pdf.output(output_buffer)
-    output_buffer.seek(0)
-    return output_buffer
+    return pdf_buffer, fileio_url, qr_path
