@@ -2,7 +2,6 @@ from fpdf import FPDF
 import qrcode
 import io
 import re
-import os
 import uuid
 import requests
 import streamlit as st
@@ -63,48 +62,29 @@ def export_to_pdf(name, age, gender, reports, summary):
     for line in summary.split('\n'):
         safe_add_multicell(line)
 
-    # Save locally
-    os.makedirs("export", exist_ok=True)
-    local_path = f"export/report_{uuid.uuid4().hex[:8]}.pdf"
-    pdf.output(local_path)
-
-    # ✅ Upload to transfer.sh
-    fileio_url = None
-    try:
-        with open(local_path, "rb") as f:
-            response = requests.put(f"https://transfer.sh/{os.path.basename(local_path)}", data=f)
-            if response.status_code == 200:
-                fileio_url = response.text.strip()
-            else:
-                st.warning(f"⚠️ transfer.sh upload error: {response.status_code}")
-                st.text(response.text)
-    except Exception as e:
-        st.error("❌ Failed to upload to transfer.sh")
-        st.exception(e)
-
-    # ✅ Generate QR code
-    qr_path = "export/qr.png"
-    if fileio_url:
-        try:
-            qr_img = qrcode.make(fileio_url)
-            qr_img.save(qr_path)
-
-            if pdf.get_y() > 230:
-                pdf.add_page()
-                pdf.rect(10, 10, 190, 277)
-
-            pdf.ln(10)
-            pdf.set_font("Helvetica", style="B", size=12)
-            pdf.cell(0, 10, "Scan to Download", ln=True)
-            pdf.image(qr_path, x=pdf.w - 60, y=pdf.get_y(), w=40)
-        except Exception as e:
-            st.warning("QR generation failed.")
-            st.exception(e)
-
     # ✅ In-memory PDF
     pdf_buffer = io.BytesIO()
     pdf_bytes = pdf.output(dest="S").encode("latin-1")
     pdf_buffer.write(pdf_bytes)
     pdf_buffer.seek(0)
+
+    # ✅ Optional: QR Code (in-memory only)
+    fileio_url = None
+    qr_path = None
+    try:
+        pdf_id = uuid.uuid4().hex[:8]
+        response = requests.put(f"https://transfer.sh/report_{pdf_id}.pdf", data=pdf_buffer.getvalue())
+        if response.status_code == 200:
+            fileio_url = response.text.strip()
+            qr_img = qrcode.make(fileio_url)
+            qr_buffer = io.BytesIO()
+            qr_img.save(qr_buffer, format="PNG")
+            qr_path = qr_buffer
+        else:
+            st.warning("⚠️ transfer.sh upload failed.")
+            st.text(response.text)
+    except Exception as e:
+        st.error("❌ QR/upload generation failed.")
+        st.exception(e)
 
     return pdf_buffer, fileio_url, qr_path
