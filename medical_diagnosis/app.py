@@ -1,97 +1,76 @@
-import os
 import streamlit as st
-import base64
-from ocr_utils import extract_text
-from parser import extract_values
-from modules.rule_based_engine import interpret_results
-from modules.pdf_exporter import export_to_pdf
+import os
+from fpdf import FPDF
+from PIL import Image
 
-# ✅ Local CSS
-def local_css(file_name):
-    css_path = os.path.join(os.path.dirname(__file__), file_name)
-    if os.path.exists(css_path):
-        with open(css_path) as f:
-            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+# Set page config
+st.set_page_config(page_title="MEDONOSIS - Diagnosis Report", layout="centered")
 
-local_css("static/style.css")
+# Load logo
+logo_path = os.path.join("static", "MEDONOSIS.png")
+if os.path.exists(logo_path):
+    st.image(logo_path, width=200)
+else:
+    st.error("Logo image not found at 'static/MEDONOSIS.png'")
 
-# ✅ Text-to-Speech
-def speak_text(text):
-    escaped = text.replace('"', r'\"').replace('\n', ' ')
-    st.markdown(f'''
-        <script>
-        var msg = new SpeechSynthesisUtterance("{escaped}");
-        window.speechSynthesis.speak(msg);
-        </script>
-    ''', unsafe_allow_html=True)
+st.markdown("### **MEDONOSIS**")
+st.markdown("#### *Decode • Diagnose • Deliver*")
+st.markdown("---")
 
-# ✅ Page Config
-st.set_page_config(page_title="Diagnostics Assistant", layout="centered")
-
-# ✅ App Header
-st.markdown("""<div style="text-align:center; padding:10px;">""", unsafe_allow_html=True)
-st.image("static/MEDONOSIS.png", width=200)
-st.markdown("""
-    <h1 style="font-family:'Segoe UI',sans-serif; margin:10px 0;">MEDONOSIS</h1>
-    <h4 style="color:gray; font-family:'Segoe UI',sans-serif;">Decode • Diagnose • Deliver</h4>
-</div>
-""", unsafe_allow_html=True)
-
-# ✅ Patient Info
-st.subheader("👤 Patient Information")
-name = st.text_input("Full Name")
-age = st.number_input("Age", min_value=1, max_value=120)
+# Input details
+name = st.text_input("Patient Name")
+age = st.number_input("Age", min_value=0, max_value=120)
 gender = st.selectbox("Gender", ["Male", "Female", "Other"])
-conditions = st.text_area("Known Conditions")
-date = st.date_input("Report Date")
+summary = st.text_area("Doctor Summary / Conclusion")
 
-# ✅ Upload Report
-st.subheader("📑 Upload Report Image")
-uploaded_files = st.file_uploader("Upload", accept_multiple_files=True, type=["jpg", "jpeg", "png"])
+# Upload multiple medical reports
+uploaded_reports = st.file_uploader("Upload medical report images", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
 
-if uploaded_files:
-    all_reports = []
-    for file in uploaded_files:
-        temp_path = f"temp_{file.name}"
-        with open(temp_path, "wb") as f:
-            f.write(file.read())
-        text = extract_text(temp_path)
-        values = extract_values(text)
-        all_reports.append(values)
-        os.remove(temp_path)
+def export_to_pdf(name, age, gender, reports, summary):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    
+    pdf.cell(200, 10, txt="MEDONOSIS - Diagnosis Report", ln=True, align='C')
+    pdf.ln(10)
+    
+    pdf.cell(200, 10, txt=f"Name: {name}", ln=True)
+    pdf.cell(200, 10, txt=f"Age: {age}", ln=True)
+    pdf.cell(200, 10, txt=f"Gender: {gender}", ln=True)
+    pdf.ln(5)
 
-    st.markdown("### 🧾 Extracted Values")
-    for i, report in enumerate(all_reports):
-        st.json(report)
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(200, 10, txt="Uploaded Reports:", ln=True)
+    pdf.set_font("Arial", size=12)
 
-    if st.button("🧠 Diagnose & Generate PDF"):
-        summary = interpret_results(all_reports, age=age, gender=gender, conditions=conditions)
+    for img_file in reports:
+        image = Image.open(img_file)
+        temp_img_path = f"temp_{img_file.name}"
+        image.save(temp_img_path)
+        pdf.image(temp_img_path, w=180)
+        os.remove(temp_img_path)
+        pdf.ln(5)
 
-        st.markdown("### 🩺 AI Diagnosis Summary")
-        safe_summary = summary.replace('\n', '<br>')
-        st.markdown(f"""
-         <div style='background-color:#e8f0fe; padding:15px; border-radius:10px; font-family:Segoe UI; color:#000; text-align:center;'>
-         {safe_summary}
-         </div>
-         """, unsafe_allow_html=True)
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(200, 10, txt="Doctor's Summary:", ln=True)
+    pdf.set_font("Arial", size=12)
+    pdf.multi_cell(0, 10, txt=summary)
 
-        speak_text(summary.split("=== Recommendations ===")[0])
+    # QR Code
+    qr_path = os.path.join("static", "qr.png")
+    if os.path.exists(qr_path):
+        pdf.image(qr_path, x=160, y=250, w=30)
+    
+    output_path = f"{name}_report.pdf"
+    pdf.output(output_path)
+    return output_path
 
-        # ✅ Generate PDF with QR
-        pdf_buffer, app_url, qr_path = export_to_pdf(name, age, gender, all_reports, summary)
-
-        # ✅ Download (in-memory)
-        st.markdown("### 📥 Download Report")
-        st.download_button(
-            label="📄 Download PDF Report",
-            data=pdf_buffer,
-            file_name="report.pdf",
-            mime="application/pdf"
-        )
-
-        # ✅ Show QR to app
-        if os.path.exists(qr_path):
-            st.image(qr_path, caption="📲 Scan to Open Diagnostics Assistant")
-        
-        # ✅ App link (optional)
-        st.markdown(f"🔗 [Visit Diagnostics Assistant]({app_url})", unsafe_allow_html=True)
+# Button to generate PDF
+if st.button("Generate PDF Report"):
+    if not name or not summary or not uploaded_reports:
+        st.warning("Please fill all fields and upload at least one report.")
+    else:
+        pdf_file_path = export_to_pdf(name, age, gender, uploaded_reports, summary)
+        with open(pdf_file_path, "rb") as f:
+            st.download_button("Download PDF", f, file_name=os.path.basename(pdf_file_path))
+        os.remove(pdf_file_path)
