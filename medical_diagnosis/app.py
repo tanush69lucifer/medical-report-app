@@ -28,19 +28,18 @@ def speak_text(text):
 # ✅ Page Config
 st.set_page_config(page_title="Diagnostics Assistant", layout="centered")
 
-# ✅ App Header
-st.markdown("""<div style="text-align:center; padding:10px;">""", unsafe_allow_html=True)
+# ✅ LOGO + Subheading Images
+st.markdown(
+    """
+    <div style="text-align:center;">
+        <img src="static/MEDONOSIS.png" width="300"><br>
+        <img src="static/Decode-Diagnose-Delive.png" width="350">
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-# 📷 Display PNG from static folder
-medonosis_img_path = os.path.join("static", "MEDONOSIS.png")
-if os.path.exists(medonosis_img_path):
-    st.image(medonosis_img_path, width=200)
-
-st.markdown("""
-    <h1 style="font-family:'Segoe UI',sans-serif; margin:10px 0;">MEDONOSIS</h1>
-    <h4 style="color:gray; font-family:'Segoe UI',sans-serif;">Decode • Diagnose • Deliver</h4>
-</div>
-""", unsafe_allow_html=True)
+st.title("👨‍⚕️ AI Medical Assistant")
 
 # ✅ Patient Info
 st.subheader("👤 Patient Information")
@@ -98,5 +97,5 @@ if uploaded_files:
         if os.path.exists(qr_path):
             st.image(qr_path, caption="📲 Scan to Open Diagnostics Assistant")
 
-        # ✅ App link
+        # ✅ App link (optional)
         st.markdown(f"🔗 [Visit Diagnostics Assistant]({app_url})", unsafe_allow_html=True)
