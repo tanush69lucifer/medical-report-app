@@ -5,6 +5,7 @@ import re
 import os
 import uuid
 import requests
+import streamlit as st
 
 def export_to_pdf(name, age, gender, reports, summary):
     pdf = FPDF()
@@ -63,22 +64,28 @@ def export_to_pdf(name, age, gender, reports, summary):
     for line in summary.split('\n'):
         safe_add_multicell(line)
 
-    # Save locally
+    # Save PDF locally
     os.makedirs("export", exist_ok=True)
     local_path = f"export/report_{uuid.uuid4().hex[:8]}.pdf"
     pdf.output(local_path)
 
-    # Upload to File.io (One-time download)
+    # Upload to file.io
     try:
         with open(local_path, "rb") as f:
             response = requests.post("https://file.io", files={"file": f})
-        response_json = response.json()
-        fileio_url = response_json.get("link")
+        if response.status_code == 200 and "application/json" in response.headers.get("Content-Type", ""):
+            response_json = response.json()
+            fileio_url = response_json.get("link")
+        else:
+            st.error(f"⚠️ File.io upload failed (code {response.status_code})")
+            st.warning(response.text)
+            fileio_url = None
     except Exception as e:
-        print("Error uploading to file.io:", e)
+        st.error("⚠️ Error uploading to file.io")
+        st.exception(e)
         fileio_url = None
 
-    # QR Code
+    # Generate QR
     qr_path = "export/qr.png"
     if fileio_url:
         qr_img = qrcode.make(fileio_url)
@@ -94,7 +101,7 @@ def export_to_pdf(name, age, gender, reports, summary):
         pdf.cell(0, 10, "Scan to Download", ln=True)
         pdf.image(qr_path, x=pdf.w - 60, y=pdf.get_y(), w=40)
 
-    # In-memory buffer for Streamlit
+    # Final buffer for Streamlit
     pdf_buffer = io.BytesIO()
     pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
