@@ -33,7 +33,7 @@ def interpret_results(report_list, age=0, gender="N/A", conditions="None"):
     summary = "\n\n=== Summary of Findings ===\n"
     summary += "\n".join([f"- {issue}" for issue in overall_findings]) if overall_findings else "All values normal.\n"
 
-       summary += "\n\n=== Medication Plan ===\n"
+    summary += "\n\n=== Medication Plan ===\n"
     comorb_list = [c.strip().lower() for c in conditions.split(",") if c.strip()]
     for issue in overall_findings:
         if issue in med_data:
@@ -73,7 +73,6 @@ def interpret_results(report_list, age=0, gender="N/A", conditions="None"):
                 summary += f"- {name}: {dose} for {duration}. {note}\n"
         else:
             summary += f"- {issue}: No medication guidance available.\n"
-
 
     summary += """
 \n=== Recommendations ===
