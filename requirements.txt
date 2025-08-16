@@ -1,6 +1,8 @@
+torch
 streamlit
 fpdf
 qrcode
 Pillow
 easyocr
 requests
+
