@@ -1,0 +1,11 @@
+import tensorflow as tf
+from . import utils_preprocess
+
+class SpectPETModel:
+    def __init__(self, model_path="models/spect_pet_model.h5"):
+        self.model = tf.keras.models.load_model(model_path)
+
+    def predict(self, image_path: str):
+        img = utils_preprocess.load_and_preprocess(image_path, target_size=(224, 224))
+        preds = self.model.predict(img)
+        return preds
