@@ -1,8 +1,11 @@
-torch
 streamlit
+torch
+tensorflow
 fpdf
 qrcode
 Pillow
 easyocr
 requests
-
+numpy
+opencv-python
+pydicom
