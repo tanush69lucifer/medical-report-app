@@ -1,7 +1,11 @@
 import os
+import sys
 import streamlit as st
 import base64
 from PIL import Image
+
+# --- Add current folder to Python path so modules can be found ---
+sys.path.append(os.path.dirname(__file__))
 
 # --- OCR + Lab Report imports ---
 from ocr_utils import extract_text
@@ -9,8 +13,8 @@ from parser import extract_values
 from modules.rule_based_engine import interpret_results
 from modules.pdf_exporter import export_to_pdf
 
-# --- Deep Learning Models ---
-from medical_diagnosis.modules.deep_models import xray_model, ct_mri_model, ultrasound_model, utils_preprocess
+# --- Deep Learning Models (fixed relative import) ---
+from modules.deep_models import xray_model, ct_mri_model, ultrasound_model, utils_preprocess
 
 # ✅ Load Local CSS
 def local_css(file_name):
@@ -33,7 +37,6 @@ with col1:
     st.image(Image.open(logo1_path), width=300)
 with col2:
     st.image(Image.open(logo2_path), width=350)
-
 
 # ====================================
 # 📌 MODE SELECTION
@@ -76,9 +79,7 @@ if mode == "Lab Report (OCR)":
             st.markdown("### 🩺 AI Diagnosis Summary")
             safe_summary = summary.replace('\n', '<br>')
             st.markdown(f"""
-            <div style='background-color:#e8f0fe; padding:15px; border-radius:10px; font-family:Segoe UI; color:#000; text-align:center;'>
-                {safe_summary}
-            </div>
+            <div style='background-color:#e8f0fe; padding:15px; border-radius:10px; font-family:Segoe UI; color:#000; text-align:center;'>{safe_summary}</div>
             """, unsafe_allow_html=True)
 
             pdf_buffer, app_url, qr_path = export_to_pdf(name, age, gender, all_reports, summary)
@@ -96,7 +97,6 @@ if mode == "Lab Report (OCR)":
 
             st.markdown(f"🔗 [Visit Diagnostics Assistant]({app_url})", unsafe_allow_html=True)
 
-
 # ====================================
 # 🖼️ MEDICAL IMAGING MODE
 # ====================================
@@ -112,7 +112,6 @@ else:
         else:
             img = utils_preprocess.load_and_preprocess(uploaded_file, target_size=(224, 224))
             
-            # let user pick model
             model_choice = st.selectbox("Select Imaging Model", ["X-Ray", "Ultrasound"])
             if model_choice == "X-Ray":
                 result = xray_model.XRayModel().predict(uploaded_file)
