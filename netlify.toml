@@ -1,6 +1,0 @@
-[build]
-  command = ""       # This tells Netlify: "Don't run pip, don't install anything."
-  publish = "."      # This tells Netlify: "Just take my files and put them online."
-
-[build.environment]
-  PYTHON_VERSION = "3.10" # Forces it to a version that won't error out even if it checks.
