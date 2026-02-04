@@ -7,5 +7,6 @@ Pillow
 easyocr
 requests
 numpy
-opencv-python
+opencv-python-headless
 pydicom
+
